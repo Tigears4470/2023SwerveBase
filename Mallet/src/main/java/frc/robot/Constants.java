@@ -17,6 +17,8 @@ public final class Constants {
     public static final double K_BACKWARDS_FEET = 6 * K_TICKS_PER_FEET; //6.572500
     public static final float K_TURN_ERROR_RANGE = 2f;
     public static final double K_DEC_TO_PI = 0.01745;
+    public static final double K_MAX_VELOCITY = 4;
+    public static final double K_MAX_ACCEL = 3;
 
 
     /*Drive train*/
@@ -26,9 +28,9 @@ public final class Constants {
 
     public static final class Auton
     {
-        public static final PIDFConfig xAutoPID     = new PIDFConfig(0.7, 0, 0);
-        public static final PIDFConfig yAutoPID     = new PIDFConfig(0.7, 0, 0);
-        public static final PIDFConfig angleAutoPID = new PIDFConfig(0.4, 0, 0.01);
+        public static final PIDFConfig xAutoPID     = new PIDFConfig(0.000000005, 0, 0);
+        public static final PIDFConfig yAutoPID     = new PIDFConfig(0.000000005, 0, 0);
+        public static final PIDFConfig angleAutoPID = new PIDFConfig(0.01, 0, 0.04);
 
 
         // TODO CHANGE SCALAR in gettargetspeeds

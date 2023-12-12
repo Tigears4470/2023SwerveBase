@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Auton;
 import frc.robot.Constants.OperatorConstants;
@@ -22,6 +23,8 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import java.io.File;
 import java.util.HashMap;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 
 public class RobotContainer {
@@ -32,7 +35,7 @@ public class RobotContainer {
     public static final HashMap<String, Command> m_eventMap = new HashMap<>();
   
   // INIT XBOX CONTROLLER
-  public static XboxController m_xbox = new XboxController(0);
+  public static CommandXboxController m_xbox = new CommandXboxController(0);
 
   // INIT CONTROLER ARRAYS
   public static HashMap<String, Trigger> controllerButtons = new HashMap<String, Trigger>();
@@ -47,7 +50,6 @@ public class RobotContainer {
     configureButtonBindings();
 
     m_drivetrain.initAutoBuilder(m_eventMap, new PIDConstants(Auton.yAutoPID.p, Auton.yAutoPID.i, Auton.yAutoPID.d), new PIDConstants(Auton.angleAutoPID.p, Auton.angleAutoPID.i, Auton.angleAutoPID.d), false);
-    m_drivetrain.setDefaultCommand(new AbsoluteDrive(m_drivetrain, () -> MathUtil.applyDeadband(-m_xbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightY(), OperatorConstants.RIGHT_Y_DEADBAND), false));
     
     String[] autoList = {"Do Nothing"};
     SmartDashboard.putStringArray("Auto List", autoList);
@@ -67,7 +69,10 @@ public class RobotContainer {
     
     // with command chooser
     m_autoChooser.setDefaultOption("Do Nothing", new WaitCommand(0));
+    m_autoChooser.addOption("Two Meter Path", m_drivetrain.loadPathPlannerCommand("TwoMeterPath", new PathConstraints(Constants.K_MAX_VELOCITY, Constants.K_MAX_ACCEL)));
+    m_autoChooser.addOption("Event One Path", m_drivetrain.loadPathPlannerCommand("EventOnePath", new PathConstraints(Constants.K_MAX_VELOCITY, Constants.K_MAX_ACCEL)));
     main.add("Auto Routine", m_autoChooser).withWidget(BuiltInWidgets.kComboBoxChooser);
+
   }
 
   public void initializeEventMap(){
@@ -75,7 +80,12 @@ public class RobotContainer {
   }
 
   // assign button functions
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    m_drivetrain.setDefaultCommand(new AbsoluteDrive(m_drivetrain, () -> MathUtil.applyDeadband(-m_xbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightY(), OperatorConstants.RIGHT_Y_DEADBAND), false));
+    
+    m_xbox.a().onTrue(m_drivetrain.loadPathPlannerCommand("TwoMeterPath", new PathConstraints(Constants.K_MAX_VELOCITY, Constants.K_MAX_ACCEL)));
+    m_xbox.b().onTrue(m_drivetrain.loadPathPlannerCommand("EventOnePath", new PathConstraints(Constants.K_MAX_VELOCITY, Constants.K_MAX_ACCEL)));
+  }
 
   public Command getAutoInput() {
     return m_autoChooser.getSelected();
