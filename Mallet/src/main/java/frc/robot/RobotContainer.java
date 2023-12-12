@@ -12,27 +12,32 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.Auton;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.drivebase.AbsoluteDrive;
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 
 
 import java.io.File;
 import java.util.HashMap;
 
+import com.pathplanner.lib.auto.PIDConstants;
+
 public class RobotContainer {
   // INIT SUBSYSTEMS
   private static final Drivetrain m_drivetrain = new Drivetrain(new File(Filesystem.getDeployDirectory(), "neo/swerve"));
   
+    // Event Map for Path Planner, there should only be one to handle all the event 
+    public static final HashMap<String, Command> m_eventMap = new HashMap<>();
+  
   // INIT XBOX CONTROLLER
   public static XboxController m_xbox = new XboxController(0);
 
-  // INIT JOYSTICK ARRAYS
-  public static HashMap<String, Trigger> controllerButtons_arm = new HashMap<String, Trigger>();
-  public static HashMap<String, Trigger> controllerButtons_drive = new HashMap<String, Trigger>();
+  // INIT CONTROLER ARRAYS
+  public static HashMap<String, Trigger> controllerButtons = new HashMap<String, Trigger>();
 
   // SMARTDASHBOARD
-  // private SendableChooser<String> m_autoChooser = new SendableChooser<String>();
   private SendableChooser<Command> m_autoChooser = new SendableChooser<Command>();
 
   // SHUFFLEBOARD
@@ -40,10 +45,16 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureButtonBindings();
+
+    m_drivetrain.initAutoBuilder(m_eventMap, new PIDConstants(Auton.yAutoPID.p, Auton.yAutoPID.i, Auton.yAutoPID.d), new PIDConstants(Auton.angleAutoPID.p, Auton.angleAutoPID.i, Auton.angleAutoPID.d), false);
     m_drivetrain.setDefaultCommand(new AbsoluteDrive(m_drivetrain, () -> MathUtil.applyDeadband(-m_xbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightY(), OperatorConstants.RIGHT_Y_DEADBAND), false));
+    
     String[] autoList = {"Do Nothing"};
     SmartDashboard.putStringArray("Auto List", autoList);
+    
+    initializeEventMap();
     initializeAutoChooser();
+    
     System.out.print(I2C.Port.kMXP);
   }
 
@@ -57,6 +68,10 @@ public class RobotContainer {
     // with command chooser
     m_autoChooser.setDefaultOption("Do Nothing", new WaitCommand(0));
     main.add("Auto Routine", m_autoChooser).withWidget(BuiltInWidgets.kComboBoxChooser);
+  }
+
+  public void initializeEventMap(){
+    m_eventMap.put("marker1", new PrintCommand("Pressed Marker 1"));
   }
 
   // assign button functions

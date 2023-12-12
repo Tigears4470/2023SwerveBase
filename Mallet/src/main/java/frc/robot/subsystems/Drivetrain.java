@@ -5,6 +5,7 @@
   package frc.robot.subsystems;
 
   import com.pathplanner.lib.PathConstraints;
+  import edu.wpi.first.wpilibj.Filesystem;
   import com.pathplanner.lib.PathPlanner;
   import com.pathplanner.lib.PathPlannerTrajectory;
   import com.pathplanner.lib.auto.PIDConstants;
@@ -17,7 +18,9 @@
   import edu.wpi.first.math.trajectory.Trajectory;
   import edu.wpi.first.wpilibj.Timer;
   import edu.wpi.first.wpilibj2.command.Command;
-  import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
   import java.io.File;
   import java.util.List;
   import java.util.Map;
@@ -321,5 +324,63 @@
       }
 
       return autoBuilder.fullAuto(pathGroup);
+    }
+    
+    /**
+     * Factory to fetch the PathPlanner command to follow the defined path.
+     *
+     * @param path             Path planner path to specify.
+     * @param constraints      {@link PathConstraints} for {@link com.pathplanner.lib.PathPlanner#loadPathGroup} function
+     * @return Returns a sendable command to follow the given path. Will return null if auto builder has not been initialized or if path is not a file
+     */
+    public CommandBase loadPathPlannerCommand(String path, PathConstraints constraints)
+    {
+      // Checks if autoBuilder has been init and file exists
+      if(autoBuilder == null || !new File(Filesystem.getDeployDirectory(), "pathplanner/" + path + ".path").isFile())
+      {
+        return null;
+      }
+      else
+      {
+        //Creates the trajectories in the path and returns them as an autonomous command group 
+        List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(path, constraints);
+        return Commands.sequence(autoBuilder.fullAuto(pathGroup));
+      }
+    }
+    
+    /**
+     * Initializes AutoBuilder IF it has not been aleady;
+     *
+     * @param eventMap         {@link java.util.HashMap} of commands corresponding to path planner events given as
+     *                         strings.
+     * @param translation      The {@link PIDConstants} for the translation of the robot while following the path.
+     * @param rotation         The {@link PIDConstants} for the rotation of the robot while following the path.
+     * @param useAllianceColor Automatically transform the path based on alliance color.
+     */
+    public void initAutoBuilder(Map<String, Command> eventMap, PIDConstants translation, PIDConstants rotation, boolean useAllianceColor)
+    {
+      if (autoBuilder == null)
+      {
+        autoBuilder = new SwerveAutoBuilder(
+            swerveDrive::getPose,
+            swerveDrive::resetOdometry,
+            translation,
+            rotation,
+            swerveDrive::setChassisSpeeds,
+            eventMap,
+            useAllianceColor,
+            this
+        );
+      }
+    }
+    
+    /**
+     * Returns this SwerveDrive's SwerveAutoBuilder
+     * 
+     * @return Returns this SwerveDrive's SwerveAutoBuilder
+     */
+    public SwerveAutoBuilder getAutoBuilder()
+    {
+      return autoBuilder;
     }
   }
