@@ -82,9 +82,6 @@ public class RobotContainer {
   // assign button functions
   private void configureButtonBindings() {
     m_drivetrain.setDefaultCommand(new AbsoluteDrive(m_drivetrain, () -> MathUtil.applyDeadband(-m_xbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightY(), OperatorConstants.RIGHT_Y_DEADBAND), false));
-    
-    m_xbox.a().onTrue(m_drivetrain.loadPathPlannerCommand("TwoMeterPath", new PathConstraints(Constants.K_MAX_VELOCITY, Constants.K_MAX_ACCEL)));
-    m_xbox.b().onTrue(m_drivetrain.loadPathPlannerCommand("EventOnePath", new PathConstraints(Constants.K_MAX_VELOCITY, Constants.K_MAX_ACCEL)));
   }
 
   public Command getAutoInput() {
