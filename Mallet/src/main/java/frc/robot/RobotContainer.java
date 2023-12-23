@@ -11,12 +11,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Auton;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.drivebase.AbsoluteDrive;
+import frc.robot.commands.drivebase.AbsoluteFieldDrive;
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 
 
@@ -34,7 +37,7 @@ public class RobotContainer {
     // Event Map for Path Planner, there should only be one to handle all the event 
     public static final HashMap<String, Command> m_eventMap = new HashMap<>();
   
-  // INIT XBOX CONTROLLER
+  // INIT CONTROLLERS
   public static CommandXboxController m_xbox = new CommandXboxController(0);
 
   // INIT CONTROLER ARRAYS
@@ -81,7 +84,10 @@ public class RobotContainer {
 
   // assign button functions
   private void configureButtonBindings() {
-    m_drivetrain.setDefaultCommand(new AbsoluteDrive(m_drivetrain, () -> MathUtil.applyDeadband(-m_xbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightY(), OperatorConstants.RIGHT_Y_DEADBAND), false));
+    if(!RobotBase.isSimulation())
+      m_drivetrain.setDefaultCommand(new AbsoluteDrive(m_drivetrain, () -> MathUtil.applyDeadband(-m_xbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightX(), OperatorConstants.RIGHT_X_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getRightY(), OperatorConstants.RIGHT_Y_DEADBAND), false));
+    else
+      m_drivetrain.setDefaultCommand(new AbsoluteFieldDrive(m_drivetrain, () -> MathUtil.applyDeadband(-m_xbox.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND), () -> MathUtil.applyDeadband(-m_xbox.getLeftX(), OperatorConstants.LEFT_X_DEADBAND), () -> -m_xbox.getRawAxis(2), false));
   }
 
   public Command getAutoInput() {
