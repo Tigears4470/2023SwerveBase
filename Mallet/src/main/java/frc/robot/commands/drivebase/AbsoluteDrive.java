@@ -4,27 +4,17 @@
 
 package frc.robot.commands.drivebase;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.SwerveSubsystem;
-import java.util.List;
 import java.util.function.DoubleSupplier;
-import swervelib.SwerveController;
-import swervelib.math.SwerveMath;
 
 /**
  * An example command that uses an example subsystem.
  */
 public class AbsoluteDrive extends Command {
 
-  private final SwerveSubsystem swerve;
   private final DoubleSupplier vX, vY;
   private final DoubleSupplier headingHorizontal, headingVertical;
-  private boolean initRotation = false;
 
   /**
    * Used to drive a swerve robot in full field-centric mode. vX and vY supply
@@ -62,7 +52,6 @@ public class AbsoluteDrive extends Command {
   public AbsoluteDrive(SwerveSubsystem swerve, DoubleSupplier vX, DoubleSupplier vY,
       DoubleSupplier headingHorizontal,
       DoubleSupplier headingVertical) {
-    this.swerve = swerve;
     this.vX = vX;
     this.vY = vY;
     this.headingHorizontal = headingHorizontal;
@@ -73,42 +62,11 @@ public class AbsoluteDrive extends Command {
 
   @Override
   public void initialize() {
-    initRotation = true;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    // Get the desired chassis speeds based on a 2 joystick module.
-    ChassisSpeeds desiredSpeeds = swerve.getTargetSpeeds(vX.getAsDouble(), vY.getAsDouble(),
-        headingHorizontal.getAsDouble(),
-        headingVertical.getAsDouble());
-
-    // Prevent Movement After Auto
-    if (initRotation) {
-      if (headingHorizontal.getAsDouble() == 0 && headingVertical.getAsDouble() == 0) {
-        // Get the curretHeading
-        Rotation2d firstLoopHeading = swerve.getHeading();
-
-        // Set the Current Heading to the desired Heading
-        desiredSpeeds = swerve.getTargetSpeeds(0, 0, firstLoopHeading.getSin(), firstLoopHeading.getCos());
-      }
-      // Dont Init Rotation Again
-      initRotation = false;
-    }
-
-    // Limit velocity to prevent tippy
-    Translation2d translation = SwerveController.getTranslation2d(desiredSpeeds);
-    translation = SwerveMath.limitVelocity(translation, swerve.getFieldVelocity(), swerve.getPose(),
-        SwerveConstants.LOOP_TIME, SwerveConstants.ROBOT_MASS, List.of(SwerveConstants.CHASSIS),
-        swerve.getSwerveDriveConfiguration());
-    SmartDashboard.putNumber("LimitedTranslation", translation.getX());
-    SmartDashboard.putString("Translation", translation.toString());
-
-    // Make the robot move
-    swerve.drive(translation, desiredSpeeds.omegaRadiansPerSecond, true);
-
   }
 
   // Called once the command ends or is interrupted.

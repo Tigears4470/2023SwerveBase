@@ -1,8 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -13,20 +10,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.drivebase.AbsoluteDrive;
-import frc.robot.commands.drivebase.AbsoluteDriveWithFocus;
 
-import java.io.File;
 import java.util.HashMap;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
 public class RobotContainer {
   // INIT SUBSYSTEMS
-  private static final SwerveSubsystem swerveSub = new SwerveSubsystem(
-      new File(Filesystem.getDeployDirectory(), "neo/swerve"));
+  private static final SwerveSubsystem swerveSub = new SwerveSubsystem();
 
   // INIT XBOX CONTROLLER
   public static XboxController xbox1 = new XboxController(0);
@@ -73,10 +64,6 @@ public class RobotContainer {
 
   // assign button functions
   private void configureButtonBindings() {
-    Trigger xButton = new Trigger(xbox1::getAButtonPressed);
-    xButton.onTrue(new AbsoluteDriveWithFocus(swerveSub,
-        () -> MathUtil.applyDeadband(-xbox1.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
-        () -> MathUtil.applyDeadband(-xbox1.getLeftX(), OperatorConstants.LEFT_X_DEADBAND), "cone"));
   }
 
   public Command getAutoInput() {
@@ -84,21 +71,8 @@ public class RobotContainer {
   }
 
   public void setDriveMode() {
-    if (RobotBase.isReal()) {
-      swerveSub.setDefaultCommand(new AbsoluteDrive(swerveSub,
-          () -> MathUtil.applyDeadband(-xbox1.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
-          () -> MathUtil.applyDeadband(-xbox1.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
-          () -> MathUtil.applyDeadband(-xbox1.getRightX(), OperatorConstants.RIGHT_X_DEADBAND),
-          () -> MathUtil.applyDeadband(-xbox1.getRightY(), OperatorConstants.RIGHT_Y_DEADBAND)));
-    } else {
-      swerveSub.setDefaultCommand(swerveSub.simDriveCommand(
-          () -> MathUtil.applyDeadband(-xbox1.getLeftY(), OperatorConstants.LEFT_Y_DEADBAND),
-          () -> MathUtil.applyDeadband(-xbox1.getLeftX(), OperatorConstants.LEFT_X_DEADBAND),
-          () -> -xbox1.getRawAxis(2)));
-    }
   }
 
   public void setMotorBrake(boolean brake) {
-    swerveSub.setMotorBrake(brake);
   }
 }
