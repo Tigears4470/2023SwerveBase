@@ -8,6 +8,10 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public final class Constants {
     public static final class SwerveConstants {
+
+    }
+
+    public static final class GyroConstants {
     }
 
     public static class OperatorConstants {

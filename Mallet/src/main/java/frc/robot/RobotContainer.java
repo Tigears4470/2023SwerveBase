@@ -13,17 +13,17 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import java.util.HashMap;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 
 public class RobotContainer {
   // INIT SUBSYSTEMS
-  private static final SwerveSubsystem swerveSub = new SwerveSubsystem();
+  // private static final SwerveSubsystem swerveSub = new SwerveSubsystem();
 
   // INIT XBOX CONTROLLER
-  public static XboxController xbox1 = new XboxController(0);
 
   // SMARTDASHBOARD
-  private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
   // SHUFFLEBOARD
   private ShuffleboardTab shuffleDriverTab = Shuffleboard.getTab("Driver's Tab");
@@ -32,6 +32,12 @@ public class RobotContainer {
   public static final HashMap<String, Command> eventMap = new HashMap<>();
 
   public RobotContainer() {
+    if(Robot.isReal()) {
+      Logger.addDataReceiver(null);
+    }
+
+
+
     // Configure default commands
     setDriveMode();
 
@@ -53,9 +59,7 @@ public class RobotContainer {
 
   public void initializeAutoChooser() {
     // with command chooser
-    autoChooser.setDefaultOption("Do Nothing", new WaitCommand(0));
-    autoChooser = AutoBuilder.buildAutoChooser();
-    shuffleDriverTab.add("Auto Routine", autoChooser).withWidget(BuiltInWidgets.kComboBoxChooser);
+    
   }
 
   public void initializeEventMap() {
@@ -67,7 +71,8 @@ public class RobotContainer {
   }
 
   public Command getAutoInput() {
-    return autoChooser.getSelected();
+    // return autoChooser.getSelected();
+    return null;
   }
 
   public void setDriveMode() {
